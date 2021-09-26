@@ -3,3 +3,23 @@
     
 2. Database used Mysql
     2.1 Configuration for the database are maintained in application.properties
+    2.2 Create database using  
+            CREATE DATABASE ROOM_COST_GENERATOR;
+    2.3 Create user using
+            CREATE USER 'admin'@'localhost' IDENTIFIED BY 'admin@123';
+    2.4 Grant all permissions to the user
+            GRANT ALL PRIVILEGES ON ROOM_COST_GENERATOR.* TO 'admin'@'localhost';
+3. Sample Input format
+    url : {localhost}/getRoomCost
+    BOdy: {
+                "roomId":"R123",
+                "checkIn":"01-OCT-2021",
+                "checkOut":"03-OCT-2021",
+                "adultCount":2,
+                "child1Age":4, //Optional
+                    .
+                    .
+                    .
+                    .
+                "child5Age":5  //Optional
+          }
