@@ -19,6 +19,7 @@ import com.example.roomCostGenerator.data.RoomDetailsRepo;
 @Service
 public class CostGeneratorHelper {
 
+	public static boolean dataInserted = false;
 	@Autowired
 	private RoomDetailsRepo roomDetailRepo;
 
@@ -31,7 +32,8 @@ public class CostGeneratorHelper {
 			e.printStackTrace();
 		}
 		System.out.println("Adding Data in repo");
-//		addData();
+		if(!dataInserted)
+		addData();
 //		viewAll();
 		List<RoomDetails> availRoomList = getRoomData(bookingDetails.getRoomId());
 		if(availRoomList.isEmpty()) {
@@ -77,7 +79,7 @@ public class CostGeneratorHelper {
 		List<RoomDetails> roomDetails = new ArrayList<RoomDetails>();
 		roomDetailRepo.getByRoomId(roomId).forEach(roomDetails::add);
 
-//		System.out.println("Get Available rooms " + roomDetails.size());
+		System.out.println("Get Available rooms " + roomDetails.size());
 		return roomDetails;
 	}
 
@@ -89,7 +91,6 @@ public class CostGeneratorHelper {
 		long stay = 0;
 		boolean exit = false;
 
-		//		need to find date diff btwn checkin and checkout
 		long inDate = inpData.getCheckIn().getTime();
 		long outDate = inpData.getCheckOut().getTime();
 		System.out.println("Calculate room Cost ");
@@ -132,12 +133,12 @@ public class CostGeneratorHelper {
 			}
 			System.out.println("ChildCount " + childCount + " AdultCount " + adultCount);
 			if(childCount > roomDetails.getMaxChildren()) {
-				System.out.println("Invalid child count");
+				System.out.println(childCount + " Children are not allowed");
 				exit = true;
 				continue;
 			}
 			if(adultCount > roomDetails.getMaxAdults()) {
-				System.out.println("Invalid adult count");
+				System.out.println(adultCount + " Adults are not allowed");
 				exit = true;
 				continue;
 			}
@@ -177,6 +178,7 @@ public class CostGeneratorHelper {
 			e.printStackTrace();
 		}
 		roomDetailRepo.saveAll(roomList);
+		dataInserted = true;
 	}
 	
 	public void viewAll() {
