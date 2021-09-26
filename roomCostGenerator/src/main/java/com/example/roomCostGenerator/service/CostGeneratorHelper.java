@@ -23,18 +23,18 @@ public class CostGeneratorHelper {
 	@Autowired
 	private RoomDetailsRepo roomDetailRepo;
 
-	public float generateCost(JSONObject inpJson) {
+	public float generateCost(BookingData bookingDetails) {
 		float totalCost = 0;
-		BookingData bookingDetails = null;
+		//		BookingData bookingDetails = null;
 		try {
-			bookingDetails = parseInput(inpJson);
+			bookingDetails = parseInput(bookingDetails);
 		} catch (ParseException | JSONException e) {
 			e.printStackTrace();
 		}
 		System.out.println("Adding Data in repo");
 		if(!dataInserted)
-		addData();
-//		viewAll();
+			addData();
+		//		viewAll();
 		List<RoomDetails> availRoomList = getRoomData(bookingDetails.getRoomId());
 		if(availRoomList.isEmpty()) {
 			return -1;
@@ -45,32 +45,32 @@ public class CostGeneratorHelper {
 		return (totalCost == 0)? -1 : totalCost;
 	}
 
-	public BookingData parseInput(JSONObject obj) throws ParseException, JSONException {
-		BookingData bookingDetails = new BookingData();
-		int iterator = 1;
-		String childAge = "";
-		String childCount = "";
+	public BookingData parseInput(BookingData bookingDetails) throws ParseException, JSONException {
+		int childCount = 0;
 
-		bookingDetails.setRoomId(obj.getString("RoomId"));
 		SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
-		Date checkInDate = df.parse(obj.getString("CheckIn"));
-		Date checkOutDate = df.parse(obj.getString("CheckOut"));
-		if(obj.has("Child"+(iterator)+"Age")) {
-		do {
-			childCount = "Child"+iterator+"Age";
-			childAge += obj.getInt(childCount) + ",";
-		}while(obj.has("Child"+(++iterator)+"Age"));
-		
-		childAge = childAge.substring(0, childAge.length()-1);
+		Date checkInDate = df.parse(bookingDetails.getCheckIn());
+		Date checkOutDate = df.parse(bookingDetails.getCheckOut());
+		if(bookingDetails.getChild1Age() > 0) {
+			childCount++;
+		}
+		if(bookingDetails.getChild2Age() > 0) {
+			childCount++;
+		}
+		if(bookingDetails.getChild3Age() > 0) {
+			childCount++;
+		}
+		if(bookingDetails.getChild4Age() > 0) {
+			childCount++;
+		}
+		if(bookingDetails.getChild5Age() > 0) {
+			childCount++;
 		}
 
-		bookingDetails.setCheckIn(checkInDate);
-		bookingDetails.setCheckOut(checkOutDate);
-		bookingDetails.setAdultCount(obj.getInt("AdultCount"));
-		bookingDetails.setChildCount(iterator-1);
-//		System.out.println(childAge);
-		bookingDetails.setChildAge(childAge);
-//		System.out.println(bookingDetails.toString());
+		bookingDetails.setCheckInDate(checkInDate);
+		bookingDetails.setCheckoutDate(checkOutDate);
+		bookingDetails.setChildCount(childCount);
+		System.out.println(bookingDetails.toString());
 
 		return bookingDetails;
 	}
@@ -90,12 +90,12 @@ public class CostGeneratorHelper {
 		float extraChildCharge = 0;
 		long stay = 0;
 		boolean exit = false;
+		int childAges[] = new int[5];
 
-		long inDate = inpData.getCheckIn().getTime();
-		long outDate = inpData.getCheckOut().getTime();
+		long inDate = inpData.getCheckInDate().getTime();
+		long outDate = inpData.getCheckoutDate().getTime();
 		System.out.println("Calculate room Cost ");
 		for(RoomDetails roomDetails : roomList) {
-//			System.out.println(roomDetails.toString());
 			if(outDate < inDate) {
 				System.out.println("Invalid Date");
 				exit = true;
@@ -119,17 +119,17 @@ public class CostGeneratorHelper {
 				stay = 1;
 			int adultCount = inpData.getAdultCount();
 			int childCount = inpData.getChildCount();
-			if(!inpData.getChildAge().equals("")) {
-				String childAges[] = inpData.getChildAge().split(",");
+			childAges[0] = inpData.getChild1Age();
+			childAges[1] = inpData.getChild2Age();
+			childAges[2] = inpData.getChild3Age();
+			childAges[3] = inpData.getChild4Age();
+			childAges[4] = inpData.getChild5Age();
 
-				for(String age : childAges) {
-					if(Integer.parseInt(age) > roomDetails.getMaxChildAge()) {
-						adultCount++;
-						childCount--;
-					}
+			for(int age : childAges) {
+				if(age > roomDetails.getMaxChildAge() && age > 0) {
+					adultCount++;
+					childCount--;
 				}
-			} else {
-				childCount=0;
 			}
 			System.out.println("ChildCount " + childCount + " AdultCount " + adultCount);
 			if(childCount > roomDetails.getMaxChildren()) {
@@ -143,27 +143,27 @@ public class CostGeneratorHelper {
 				continue;
 			}
 			baseCharge += roomDetails.getPricePerDay() * stay;
-//			System.out.println("basecharge " + baseCharge);
+			//			System.out.println("basecharge " + baseCharge);
 			if(adultCount > 2) {
 				inpData.setAdultCount((adultCount - 2));
 				extraAdultCharge = roomDetails.getExtraAdultCharges() * (adultCount-2) * stay;
-//				System.out.println("Extra adult charge " + extraAdultCharge);
+				//				System.out.println("Extra adult charge " + extraAdultCharge);
 			}
 
 			if(childCount > 0) {
 				extraChildCharge = roomDetails.getExtraChildCharges() * childCount * stay;
-//				System.out.println("Child charge "+extraChildCharge);
+				//				System.out.println("Child charge "+extraChildCharge);
 			}
 			totalCost = baseCharge + extraAdultCharge + extraChildCharge;
-//			System.out.println("Total cost " + totalCost);
+			//			System.out.println("Total cost " + totalCost);
 			if(!exit)
 				return totalCost;
 		}
-		
+
 
 		return totalCost;
 	}
-	
+
 	public void addData() {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd-MMM-yyyy");
 		List<RoomDetails> roomList = null;
@@ -180,13 +180,13 @@ public class CostGeneratorHelper {
 		roomDetailRepo.saveAll(roomList);
 		dataInserted = true;
 	}
-	
+
 	public void viewAll() {
 		System.out.println("view all rooms");
 		List<RoomDetails> roomList = new ArrayList<RoomDetails>();
-		
+
 		roomDetailRepo.findAll().forEach(roomList::add);
-		
+
 		for(RoomDetails rooms: roomList) {
 			System.out.println(rooms.toString());
 		}
