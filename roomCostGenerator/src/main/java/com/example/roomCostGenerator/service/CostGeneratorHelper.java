@@ -32,7 +32,7 @@ public class CostGeneratorHelper {
 		}
 		System.out.println("Adding Data in repo");
 //		addData();
-		viewAll();
+//		viewAll();
 		List<RoomDetails> availRoomList = getRoomData(bookingDetails.getRoomId());
 		if(availRoomList.isEmpty()) {
 			return -1;
@@ -48,7 +48,6 @@ public class CostGeneratorHelper {
 		int iterator = 1;
 		String childAge = "";
 		String childCount = "";
-//		long inDate = null, outDate = null;
 
 		bookingDetails.setRoomId(obj.getString("RoomId"));
 		SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy");
@@ -67,9 +66,9 @@ public class CostGeneratorHelper {
 		bookingDetails.setCheckOut(checkOutDate);
 		bookingDetails.setAdultCount(obj.getInt("AdultCount"));
 		bookingDetails.setChildCount(iterator-1);
-				System.out.println(childAge);
+//		System.out.println(childAge);
 		bookingDetails.setChildAge(childAge);
-		System.out.println(bookingDetails.toString());
+//		System.out.println(bookingDetails.toString());
 
 		return bookingDetails;
 	}
@@ -78,7 +77,7 @@ public class CostGeneratorHelper {
 		List<RoomDetails> roomDetails = new ArrayList<RoomDetails>();
 		roomDetailRepo.getByRoomId(roomId).forEach(roomDetails::add);
 
-		System.out.println("Get Available rooms " + roomDetails.size());
+//		System.out.println("Get Available rooms " + roomDetails.size());
 		return roomDetails;
 	}
 
@@ -95,19 +94,19 @@ public class CostGeneratorHelper {
 		long outDate = inpData.getCheckOut().getTime();
 		System.out.println("Calculate room Cost ");
 		for(RoomDetails roomDetails : roomList) {
-			System.out.println(roomDetails.toString());
+//			System.out.println(roomDetails.toString());
 			if(outDate < inDate) {
-				System.out.println("Invalid Date1");
+				System.out.println("Invalid Date");
 				exit = true;
 				continue;
 			}
 			if(inDate < roomDetails.getRateValidFrom().getTime() || outDate < roomDetails.getRateValidFrom().getTime()) {
-				System.out.println("Invalid Date2");
+				System.out.println("Booking unavailable");
 				exit = true;
 				continue;
 			}
 			if(inDate > roomDetails.getRateValidTo().getTime() || outDate > roomDetails.getRateValidTo().getTime()) {
-				System.out.println("Invalid Date3");
+				System.out.println("Booking unavailable");
 				exit = true;
 				continue;
 			}
@@ -133,29 +132,29 @@ public class CostGeneratorHelper {
 			}
 			System.out.println("ChildCount " + childCount + " AdultCount " + adultCount);
 			if(childCount > roomDetails.getMaxChildren()) {
-				System.out.println("invalid childCount");
+				System.out.println("Invalid child count");
 				exit = true;
 				continue;
 			}
 			if(adultCount > roomDetails.getMaxAdults()) {
-				System.out.println("invalid adult count");
+				System.out.println("Invalid adult count");
 				exit = true;
 				continue;
 			}
 			baseCharge += roomDetails.getPricePerDay() * stay;
-			System.out.println("basecharge " + baseCharge);
+//			System.out.println("basecharge " + baseCharge);
 			if(adultCount > 2) {
 				inpData.setAdultCount((adultCount - 2));
 				extraAdultCharge = roomDetails.getExtraAdultCharges() * (adultCount-2) * stay;
-				System.out.println("Extra adult charge " + extraAdultCharge);
+//				System.out.println("Extra adult charge " + extraAdultCharge);
 			}
 
 			if(childCount > 0) {
-				extraChildCharge = roomDetails.getExtraChildCharges() * childCount;
-				System.out.println("child charge "+extraChildCharge);
+				extraChildCharge = roomDetails.getExtraChildCharges() * childCount * stay;
+//				System.out.println("Child charge "+extraChildCharge);
 			}
 			totalCost = baseCharge + extraAdultCharge + extraChildCharge;
-			System.out.println("total cost " + totalCost);
+//			System.out.println("Total cost " + totalCost);
 			if(!exit)
 				return totalCost;
 		}
