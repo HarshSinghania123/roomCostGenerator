@@ -23,7 +23,7 @@ public class CostGeneController {
 
 	@Autowired
 	private CostGeneratorHelper helper;
-	
+		
 	@RequestMapping(method = RequestMethod.POST, value = "/getRoomCost")
 	public float getRoomCost(HttpServletRequest request ){
 		BufferedReader reader = null;
